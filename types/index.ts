@@ -8,12 +8,19 @@ export interface User {
   createdAt: Date;
 }
 
+export interface GeoLocation {
+  latitude: number;
+  longitude: number;
+}
+
 export interface Plant {
   id: string;
   name: string;
   species: string;
   image: string;
   location: PlantLocation;
+  geoLocation?: GeoLocation; // Geographical coordinates of the plant
+  region?: string; // Area/region name where the plant is located
   age: number; // in weeks
   userId: string;
   twitterHandle?: string;

@@ -5,7 +5,8 @@ import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import Theme from '@/constants/Theme';
 import { mockPlants, getPlantSensorData, getPlantHealthData, getPlantTweets } from '@/data/mockData';
-import { ArrowLeft, Timer, Leaf, Activity, ChevronDown, ChevronUp, Droplet } from 'lucide-react-native';
+import { getPlantLocationInfo } from '@/data/mockPlantLocations';
+import { ArrowLeft, Timer, Leaf, Activity, ChevronDown, ChevronUp, Droplet, MapPin } from 'lucide-react-native';
 import StatusBadge from '@/components/common/StatusBadge';
 import SensorStatsRow from '@/components/plants/SensorStatsRow';
 import { formatTimeInMinutes } from '@/utils/formatUtils';
@@ -21,6 +22,7 @@ export default function PlantDetailScreen() {
   const sensorData = plant ? getPlantSensorData(plant.id) : undefined;
   const healthData = plant ? getPlantHealthData(plant.id) : undefined;
   const tweets = plant ? getPlantTweets(plant.id) : [];
+  const locationInfo = plant ? getPlantLocationInfo(plant.id) : null;
 
   // Define styles that depend on colors here
   const dynamicStyles = {
@@ -80,10 +82,33 @@ export default function PlantDetailScreen() {
               <View style={styles.plantMetaItem}>
                 <Text style={styles.plantMetaText}>{plant.age} weeks</Text>
               </View>
+              {locationInfo && (
+                <View style={styles.plantMetaItem}>
+                  <MapPin size={16} color="#FFFFFF" style={{ marginRight: 4 }} />
+                  <Text style={styles.plantMetaText}>{locationInfo.region}</Text>
+                </View>
+              )}
             </View>
           </View>
         </View>
       </View>
+
+      {locationInfo && (
+        <View style={[styles.locationCard, { backgroundColor: colors.card }]}>
+          <View style={styles.locationHeader}>
+            <View style={[styles.iconCircle, { backgroundColor: `${colors.info}20` }]}>
+              <MapPin size={20} color={colors.info} />
+            </View>
+            <Text style={[styles.locationTitle, { color: colors.text }]}>Location</Text>
+          </View>
+          <View style={styles.locationDetails}>
+            <Text style={[styles.locationRegion, { color: colors.text }]}>Region: {locationInfo.region}</Text>
+            <Text style={[styles.locationCoords, { color: colors.textSecondary }]}>
+              Coordinates: {locationInfo.geoLocation.latitude.toFixed(4)}, {locationInfo.geoLocation.longitude.toFixed(4)}
+            </Text>
+          </View>
+        </View>
+      )}
 
       <View style={styles.statsContainer}>
         <View style={styles.statsRow}>
@@ -228,118 +253,115 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: Theme.spacing.xxl,
+    paddingBottom: 80,
   },
   header: {
     position: 'absolute',
-    top: 60,
-    left: Theme.spacing.l,
+    top: 50,
+    left: 20,
     zIndex: 10,
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: Theme.borderRadius.circle,
-    justifyContent: 'center',
+    height: 40,
+    width: 40,
+    borderRadius: 20,
     alignItems: 'center',
-    ...Theme.shadows.small,
+    justifyContent: 'center',
   },
   notFoundContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 150,
+    padding: 20,
   },
   notFoundText: {
+    fontSize: 18,
     fontFamily: 'Poppins-Medium',
-    fontSize: Theme.typography.fontSize.l,
+    textAlign: 'center',
   },
   plantImageContainer: {
-    height: 340,
+    height: 350,
     width: '100%',
   },
   plantImage: {
-    width: '100%',
     height: '100%',
-    opacity: 0.9,
+    width: '100%',
+    resizeMode: 'cover',
   },
   plantOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    paddingBottom: 30,
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   plantInfo: {
-    padding: Theme.spacing.l,
+    width: '100%',
   },
   plantName: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: Theme.typography.fontSize.xxl,
     color: '#FFFFFF',
-    marginBottom: Theme.spacing.xs,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    fontSize: 28,
+    fontFamily: 'Poppins-SemiBold',
   },
   plantSpecies: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 16,
     fontFamily: 'Poppins-Regular',
-    fontSize: Theme.typography.fontSize.m,
-    color: '#FFFFFF',
-    opacity: 0.9,
-    marginBottom: Theme.spacing.s,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    marginBottom: 8,
   },
   plantMetaRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 5,
   },
   plantMetaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: Theme.spacing.l,
+    marginRight: 16,
+    paddingVertical: 4,
   },
   plantMetaText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: Theme.typography.fontSize.s,
     color: '#FFFFFF',
-    marginLeft: Theme.spacing.xs,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontSize: 14,
+    fontFamily: 'Poppins-Medium',
   },
   statsContainer: {
-    padding: Theme.spacing.l,
+    padding: 20,
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: Theme.spacing.m,
+    gap: 10,
+    marginTop: 20,
   },
   statItem: {
-    width: '31%',
-    borderRadius: 10,
-    padding: Theme.spacing.s,
+    flex: 1,
+    borderRadius: Theme.borderRadius.m,
+    padding: 16,
     alignItems: 'center',
+    ...Theme.shadows.small,
   },
   statValue: {
-    fontFamily: 'Poppins-SemiBold',
     fontSize: 24,
+    fontFamily: 'Poppins-SemiBold',
   },
   statUnit: {
-    fontFamily: 'Poppins-Regular',
     fontSize: 14,
-    opacity: 0.8,
+    fontFamily: 'Poppins-Regular',
   },
   statLabel: {
-    fontFamily: 'Poppins-Regular',
     fontSize: 12,
-    marginTop: 2,
+    fontFamily: 'Poppins-Regular',
+    marginTop: 5,
   },
   wateringCard: {
     borderRadius: Theme.borderRadius.l,
     padding: Theme.spacing.m,
-    marginBottom: Theme.spacing.m,
+    marginTop: Theme.spacing.l,
+    alignItems: 'center',
+    justifyContent: 'center',
     ...Theme.shadows.small,
   },
   alertText: {
@@ -348,14 +370,14 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexDirection: 'row',
-    marginVertical: Theme.spacing.l,
+    marginTop: 20,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
+    marginHorizontal: -10,
+    paddingHorizontal: 10,
   },
   tabButton: {
-    paddingVertical: Theme.spacing.s,
-    paddingHorizontal: Theme.spacing.m,
-    marginRight: Theme.spacing.l,
+    paddingBottom: 10,
+    marginRight: 20,
   },
   tabText: {
     fontFamily: 'Poppins-Regular',
@@ -456,5 +478,35 @@ const styles = StyleSheet.create({
   viewMoreText: {
     fontFamily: 'Poppins-Medium',
     fontSize: Theme.typography.fontSize.m,
+  },
+  locationCard: {
+    borderRadius: Theme.borderRadius.l,
+    padding: Theme.spacing.l,
+    marginHorizontal: Theme.spacing.l,
+    marginTop: Theme.spacing.l,
+    marginBottom: Theme.spacing.m,
+    ...Theme.shadows.small,
+  },
+  locationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Theme.spacing.m,
+  },
+  locationTitle: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: Theme.typography.fontSize.l,
+    marginLeft: Theme.spacing.m,
+  },
+  locationDetails: {
+    paddingLeft: Theme.spacing.m,
+  },
+  locationRegion: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: Theme.typography.fontSize.m,
+    marginBottom: Theme.spacing.s,
+  },
+  locationCoords: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: Theme.typography.fontSize.s,
   },
 });

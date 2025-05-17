@@ -2,7 +2,7 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Home, Leaf, ChartBar as BarChart3 } from 'lucide-react-native';
+import { Home, Leaf, ChartBar as BarChart3, Map } from 'lucide-react-native';
 import Theme from '@/constants/Theme';
 
 export default function TabLayout() {
@@ -53,6 +53,13 @@ export default function TabLayout() {
         options={{
           tabBarIcon: ({ color, size }) => <Leaf size={size} color={color} />,
           tabBarLabel: "Plants"
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          tabBarIcon: ({ color, size }) => <Map size={size} color={color} />,
+          tabBarLabel: "Map"
         }}
       />
       

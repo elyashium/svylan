@@ -1,23 +1,35 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import Theme from '@/constants/Theme';
 import Logo from '@/assets/images/logo';
 import Button from '@/components/common/Button';
+import auth from '@react-native-firebase/auth';
 
 export default function SplashScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
 
   useEffect(() => {
-    // Auto navigate after a delay
-    const timer = setTimeout(() => {
-      router.replace('/auth');
-    }, 3000);
+    // Check authentication status first
+    const unsubscribe = auth().onAuthStateChanged(user => {
+      // Auto navigate after a short delay
+      const timer = setTimeout(() => {
+        if (user) {
+          // User is signed in, navigate to tabs
+          router.replace('/(tabs)');
+        } else {
+          // No user is signed in, go to auth screen
+          router.replace('/auth');
+        }
+      }, 2000);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleGetStarted = () => {
@@ -40,15 +52,8 @@ export default function SplashScreen() {
         />
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Get Started"
-          onPress={handleGetStarted}
-          variant="secondary"
-          size="large"
-          style={{ backgroundColor: '#FFFFFF' }}
-          textStyle={{ color: colors.primary }}
-        />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator color="#FFFFFF" size="large" />
       </View>
     </View>
   );
@@ -87,7 +92,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  buttonContainer: {
+  loadingContainer: {
+    alignItems: 'center',
     marginBottom: Theme.spacing.xl,
   },
 });
