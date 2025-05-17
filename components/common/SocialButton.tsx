@@ -4,7 +4,8 @@ import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import Theme from '@/constants/Theme';
 
-type SocialProvider = 'google' | 'facebook' | 'twitter';
+// Only Google is supported as we only have the Google logo
+type SocialProvider = 'google'; 
 
 interface SocialButtonProps {
   provider: SocialProvider;
@@ -26,21 +27,14 @@ export default function SocialButton({
         return {
           logo: require('@/assets/images/google-logo.png'),
           text: 'Continue with Google',
-          color: '#FFFFFF',
+          color: '#FFFFFF', // Standard Google button color
         };
-      case 'facebook':
-        return {
-          logo: require('@/assets/images/facebook-logo.png'),
-          text: 'Continue with Facebook',
-          color: '#1877F2',
-        };
-      case 'twitter':
-        return {
-          logo: require('@/assets/images/twitter-logo.png'),
-          text: 'Continue with Twitter',
-          color: '#1DA1F2',
-        };
+      // Cases for 'facebook' and 'twitter' are removed as their logos are not present.
+      // If you add their logos to assets/images, you can re-add those cases.
       default:
+        // Fallback to Google details if an unsupported provider is passed,
+        // or you could throw an error or return null.
+        console.warn(`SocialButton: Provider '${provider}' is not supported or logo is missing. Defaulting to Google.`);
         return {
           logo: require('@/assets/images/google-logo.png'),
           text: 'Continue with Google',
@@ -51,6 +45,12 @@ export default function SocialButton({
 
   const providerDetails = getProviderDetails();
 
+  // If providerDetails is null (e.g., if you choose to return null for unsupported providers),
+  // you might want to return null here as well to render nothing.
+  if (!providerDetails) {
+    return null;
+  }
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -59,14 +59,14 @@ export default function SocialButton({
         styles.button,
         { 
           backgroundColor: providerDetails.color,
-          borderColor: colors.border,
+          borderColor: colors.border, // Using theme border color
         },
         style,
       ]}
     >
       <View style={styles.contentContainer}>
         <Image source={providerDetails.logo} style={styles.logo} />
-        <Text style={styles.text}>{providerDetails.text}</Text>
+        <Text style={[styles.text, {color: provider === 'google' ? colors.text : '#FFFFFF' }]}>{providerDetails.text}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -95,6 +95,6 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: 'Poppins-Medium',
     fontSize: Theme.typography.fontSize.m,
-    color: '#000000',
+    // color will be set dynamically based on provider
   },
 }); 
