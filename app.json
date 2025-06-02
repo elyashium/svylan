@@ -55,7 +55,14 @@
         }
       ],
       "@react-native-firebase/app",
-      "@react-native-firebase/auth"
+      "@react-native-firebase/auth",
+      [
+        "react-native-maps",
+        {
+          "androidGoogleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY",
+          "iosGoogleMapsApiKey": "YOUR_IOS_GOOGLE_MAPS_API_KEY_IF_ANY"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

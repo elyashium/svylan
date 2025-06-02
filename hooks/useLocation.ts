@@ -26,88 +26,70 @@ export const useLocation = () => {
   });
 
   useEffect(() => {
-    // For now, we'll just mock the location with a timeout to simulate loading
-    // In the future, this will be replaced with actual Expo Location API calls
+    // Comment out or remove the mockLocationRequest
+    /*
     const mockLocationRequest = async () => {
-      try {
-        // Simulate permission request and loading delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock successful location retrieval
-        const mockUserLocation = {
-          latitude: defaultMapRegion.latitude,
-          longitude: defaultMapRegion.longitude,
-        };
-        
-        setState({
-          userLocation: mockUserLocation,
-          errorMsg: null,
-          permissionGranted: true,
-          loading: false,
-          region: {
-            ...defaultMapRegion,
-            latitude: mockUserLocation.latitude,
-            longitude: mockUserLocation.longitude,
-          },
-        });
-      } catch (error) {
-        setState(prev => ({
-          ...prev,
-          errorMsg: "Failed to get location",
-          loading: false,
-        }));
-      }
+      // ... mock implementation ...
     };
-
     mockLocationRequest();
+    */
     
-    // Comment out real implementation for now, but this is how it would be done:
-    /* 
+    // Real implementation:
     const getLocation = async () => {
       try {
+        setState(prev => ({ ...prev, loading: true, errorMsg: null })); // Set loading true at the start
         const { status } = await Location.requestForegroundPermissionsAsync();
         
         if (status !== 'granted') {
           setState(prev => ({
             ...prev,
             errorMsg: 'Permission to access location was denied',
+            permissionGranted: false,
             loading: false,
+            // Optionally, keep region as default or set to a specific state
           }));
           return;
         }
         
-        const location = await Location.getCurrentPositionAsync({});
-        const userLocation = {
+        // It's good practice to set a timeout for getCurrentPositionAsync
+        // in case it hangs indefinitely.
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced, // You can adjust accuracy
+        });
+        const userLocationData = {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         };
         
-        setState({
-          userLocation,
+        setState({ // Set the full state in one go
+          userLocation: userLocationData,
           errorMsg: null,
           permissionGranted: true,
           loading: false,
-          region: {
-            latitude: userLocation.latitude,
-            longitude: userLocation.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
+          region: { // Update region based on user's actual location
+            latitude: userLocationData.latitude,
+            longitude: userLocationData.longitude,
+            latitudeDelta: 0.02, // Zoom level - adjust as needed
+            longitudeDelta: 0.01, // Zoom level - adjust as needed
           },
         });
       } catch (error) {
+        console.error("Error getting location:", error); // Log the actual error
         setState(prev => ({
           ...prev,
-          errorMsg: "Failed to get location",
+          errorMsg: "Failed to get location. Please ensure location services are enabled.", // More specific error
+          userLocation: null, // Clear location on error
+          permissionGranted: status === 'granted', // Keep permission status if known
           loading: false,
         }));
       }
     };
     
     getLocation();
-    */
-  }, []);
+  }, []); // Empty dependency array, so it runs once on mount
 
   return state;
 };
 
-export default useLocation; 
+// remove the default export if you have `export const useLocation`
+// export default useLocation; 
